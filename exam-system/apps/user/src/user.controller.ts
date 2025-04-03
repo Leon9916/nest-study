@@ -1,6 +1,8 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RedisService } from '@app/redis';
+import { RegisterUserDto } from './dto/register-user-dto';
+import { EmailService } from '@app/email';
 
 @Controller()
 export class UserController {
@@ -9,9 +11,26 @@ export class UserController {
   @Inject(RedisService)
   private redisService: RedisService
 
-  @Get()
-  async getHello() {
-    const keys = await this.redisService.keys('*');
-    return this.userService.getHello() + keys;
+  @Inject(EmailService)
+  private emailService: EmailService
+
+  @Get('register-captcha')
+  async captcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2,8)
+
+    await this.redisService.set(`captcha_${address}`, code, 5 * 60)
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '注册验证码',
+      html: `<p>你的验证码是 ${code}</p>`
+    })
+    return '发送成功'
   }
+
+  @Post('register')
+  async register(@Body() registerUser: RegisterUserDto) {
+    return await this.userService.register(registerUser)
+  }
+
 }
