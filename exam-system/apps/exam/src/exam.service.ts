@@ -74,4 +74,16 @@ export class ExamService {
       },
     });
   }
+
+  async unpublish(userId: number, id: number) {
+    return this.prismaService.exam.update({
+      where: {
+        id,
+        createUserId: userId,
+      },
+      data: {
+        isPublish: false,
+      },
+    });
+  }
 }

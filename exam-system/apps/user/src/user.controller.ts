@@ -50,7 +50,6 @@ export class UserController {
   }
 
   @Post('login')
-  @ReuqireLogin()
   async userLogin(@Body() loginUser: LoginUserDto) {
     const user = await this.userService.login(loginUser);
 
