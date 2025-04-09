@@ -104,3 +104,11 @@ export async function examUnpublish(id: number) {
 export async function examDelete(id: number) {
   return await examServiceInstance.delete("/delete/" + id);
 }
+
+export async function examFind(id: number) {
+  return await examServiceInstance.get("/find/" + id);
+}
+
+export async function examSave(data: { id: number; content: string }) {
+  return await examServiceInstance.post("/save", data);
+}
