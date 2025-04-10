@@ -112,3 +112,19 @@ export async function examFind(id: number) {
 export async function examSave(data: { id: number; content: string }) {
   return await examServiceInstance.post("/save", data);
 }
+
+const answerServiceInstance = axios.create({
+  baseURL: "http://localhost:3003/",
+  timeout: 3000,
+});
+
+answerServiceInstance.interceptors.request.use(requestInterceptor);
+
+answerServiceInstance.interceptors.response.use(
+  responseIntercepor,
+  responseErrorIntercepor
+);
+
+export async function answerAdd(data: { examId: number; content: string }) {
+  return await answerServiceInstance.post("/add", data);
+}
