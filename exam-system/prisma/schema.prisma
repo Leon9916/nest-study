@@ -21,7 +21,8 @@ model User {
   createTime DateTime @default(now())
   updateTime DateTime @updatedAt
 
-  exam Exam[]
+  exam    Exam[]
+  answers Answer[]
 }
 
 model Exam {
@@ -35,4 +36,20 @@ model Exam {
 
   createUser   User? @relation(fields: [createUserId], references: [id])
   createUserId Int?
+
+  answers Answer[]
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  score      Int
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  answerer   User? @relation(fields: [answererId], references: [id])
+  answererId Int?
+
+  exam   Exam? @relation(fields: [examId], references: [id])
+  examId Int?
 }
