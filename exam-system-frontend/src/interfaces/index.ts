@@ -132,3 +132,23 @@ export async function answerAdd(data: { examId: number; content: string }) {
 export async function answerFind(id: number) {
   return await answerServiceInstance.get("/find/" + id);
 }
+
+const analyseServiceInstance = axios.create({
+  baseURL: "http://localhost:3004/",
+  timeout: 3000,
+});
+
+analyseServiceInstance.interceptors.request.use(requestInterceptor);
+
+analyseServiceInstance.interceptors.response.use(
+  responseIntercepor,
+  responseErrorIntercepor
+);
+
+export async function ranking(examId: number) {
+  return await analyseServiceInstance.get("/ranking", {
+    params: {
+      examId,
+    },
+  });
+}

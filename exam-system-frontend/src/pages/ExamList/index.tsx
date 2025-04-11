@@ -9,6 +9,7 @@ import {
 } from "../../interfaces";
 import { ExamAddModal } from "./ExamAddModal";
 import { Link } from "react-router-dom";
+import { RankingModal } from "./RankingModal";
 
 interface Exam {
   id: number;
@@ -22,6 +23,8 @@ export function ExamList() {
   const [list, setList] = useState<Array<Exam>>();
   const [bin, setBin] = useState(false);
   const [isExamAddModalOpen, setIsExamAddModalOpen] = useState(false);
+  const [isRankingModalOpen, setIsRankingModalOpen] = useState(false);
+  const [curExamId, setCurExamId] = useState<number>();
 
   async function query() {
     try {
@@ -118,6 +121,25 @@ export function ExamList() {
                     >
                       <Button type="default">考试链接</Button>
                     </Popover>
+                    <Button
+                      className="btn"
+                      type="primary"
+                      style={{ background: "orange" }}
+                      onClick={() => {
+                        setIsRankingModalOpen(true);
+                        setCurExamId(item.id);
+                      }}
+                    >
+                      排行榜
+                    </Button>
+                    <a
+                      href={
+                        "http://localhost:3003/export?examId=" + item.id
+                      }
+                      download
+                    >
+                      导出所有答卷
+                    </a>
                     <Popconfirm
                       title="试卷删除"
                       description="确认放入回收站吗？"
@@ -145,6 +167,13 @@ export function ExamList() {
           setIsExamAddModalOpen(false);
           query();
         }}
+      />
+      <RankingModal
+        isOpen={isRankingModalOpen}
+        handleClose={() => {
+          setIsRankingModalOpen(false);
+        }}
+        examId={curExamId}
       />
     </div>
   );
