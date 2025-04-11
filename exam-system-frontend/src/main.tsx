@@ -8,6 +8,7 @@ import { Edit } from "./pages/Edit";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Exam } from "./pages/Exam";
+import { Res } from "./pages/Res";
 
 const routes = [
   {
@@ -33,6 +34,10 @@ const routes = [
   {
     path: "exam/:id",
     element: <Exam />,
+  },
+  {
+    path: "res/:id",
+    element: <Res />,
   },
 ];
 const router = createBrowserRouter(routes);
