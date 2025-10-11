@@ -3,11 +3,12 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Register } from './pages/Register';
 import { Login } from './pages/Login';
 import { UpdatePassword } from './pages/UpdatePassword';
+import { Index } from './pages/index';
 
 const routes = [
   {
     path: "/",
-    element: <div>index</div>,
+    element: <Index/>,
   },
   {
     path: "login",

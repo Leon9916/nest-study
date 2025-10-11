@@ -25,9 +25,7 @@ const layout2 = {
 
 export function Register() {
   const [form] = useForm();
-  const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
-
   async function sendCaptcha() {
     const address = form.getFieldValue("email");
     if (!address) {
@@ -44,19 +42,23 @@ export function Register() {
     }
   }
 
+  const navigate = useNavigate();
+
   const onFinish = async (values: RegisterUser) => {
     if (values.password !== values.confirmPassword) {
       return messageApi.error("两次密码不一致");
     }
-    const res = await register(values);
+    try {
+      const res = await register(values);
 
-    if (res.status === 201 || res.status === 200) {
-      messageApi.success("注册成功");
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-    } else {
-      messageApi.error(res.data.data || "系统繁忙，请稍后再试");
+      if (res.status === 201 || res.status === 200) {
+        messageApi.success("注册成功");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      }
+    } catch (e: any) {
+      messageApi.error(e.response?.data?.message || "系统繁忙，请稍后再试");
     }
   };
 

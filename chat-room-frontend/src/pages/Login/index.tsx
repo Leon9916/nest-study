@@ -1,4 +1,4 @@
-import { Button, Form, Input, message } from "antd";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import "./index.css";
 import { login } from "../../interfaces";
 import { useNavigate } from "react-router-dom";
@@ -19,8 +19,8 @@ const layout2 = {
 };
 
 export function Login() {
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
+  const [messageApi, contextHolder] = message.useMessage();
   const onFinish = async (values: LoginUser) => {
     try {
       const res = await login(values.username, values.password);
