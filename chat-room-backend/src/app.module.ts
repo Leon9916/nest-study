@@ -10,6 +10,8 @@ import { PrismaService } from './prisma/prisma.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import { FriendshipModule } from './friendship/friendship.module';
+import { ChatroomModule } from './chatroom/chatroom.module';
+import { MinioModule } from './minio/minio.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { FriendshipModule } from './friendship/friendship.module';
       },
     }),
     FriendshipModule,
+    ChatroomModule,
+    MinioModule,
   ],
   controllers: [AppController],
   providers: [
