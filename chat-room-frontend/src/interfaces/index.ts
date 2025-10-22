@@ -1,11 +1,47 @@
 import axios from "axios";
 import type { RegisterUser } from "../pages/Register";
 import type { UpdatePassword } from "../pages/UpdatePassword";
+import type { UserInfo } from "../pages/UpdateInfo";
+import { message } from "antd";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:3005/",
   timeout: 3000,
 });
+
+axiosInstance.interceptors.request.use(function (config) {
+  const accessToken = localStorage.getItem("token");
+
+  if (accessToken) {
+    config.headers.authorization = "Bearer " + accessToken;
+  }
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    const newToken = response.headers["token"];
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    }
+    return response;
+  },
+  async (error) => {
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+    let { data } = error.response;
+    if (data.statusCode === 401) {
+      message.error(data.message);
+
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
+    } else {
+      return Promise.reject(error);
+    }
+  }
+);
 
 export async function login(username: string, password: string) {
   return await axiosInstance.post("/user/login", {
@@ -36,4 +72,20 @@ export async function updatePasswordCaptcha(email: string) {
 
 export async function updatePassword(data: UpdatePassword) {
   return await axiosInstance.post("/user/update_password", data);
+}
+
+export async function getUserInfo() {
+  return await axiosInstance.get("/user/info");
+}
+
+export async function updateInfo(data: UserInfo) {
+  return await axiosInstance.post("/user/update", data);
+}
+
+export async function updateUserInfoCaptcha(address: any) {
+  return await axiosInstance.get(`/user/update/captcha?address=${address}`);
+}
+
+export async function presignedUrl(fileName: string) {
+  return axiosInstance.get(`/minio/presignedUrl?name=${fileName}`);
 }

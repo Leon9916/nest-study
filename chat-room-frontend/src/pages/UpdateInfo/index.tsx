@@ -65,7 +65,7 @@ export function UpdateInfo() {
 
   const sendCaptcha = async function () {
     try {
-      const res = await updateUserInfoCaptcha();
+      const res = await updateUserInfoCaptcha(form.getFieldValue("email"));
       if (res.status === 201 || res.status === 200) {
         messageApi.success("发送成功");
       }
