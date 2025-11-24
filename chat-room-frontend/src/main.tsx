@@ -5,12 +5,44 @@ import { Login } from "./pages/Login";
 import { UpdatePassword } from "./pages/UpdatePassword";
 import { Index } from "./pages/index";
 import { UpdateInfo } from "./pages/UpdateInfo";
+import { Friendship } from "./pages/Friendship";
+import { Group } from "./pages/Group";
+import { Chat } from "./pages/Chat";
+import { Collection } from "./pages/Collection";
+import { Notification } from "./pages/Notification";
+import { Menu } from "./pages/Menu";
 
 const routes = [
   {
     path: "/",
     element: <Index />,
     children: [
+      {
+        path: '/',
+        element: <Menu/>,
+        children: [
+          {
+            path: '/',
+            element: <Friendship/>
+          },
+          {
+            path: '/group',
+            element: <Group/>
+          },
+          {
+            path: 'chat',
+            element: <Chat/>
+          },
+          {
+            path: 'collection',
+            element: <Collection/>
+          },
+          {
+            path: 'notification',
+            element: <Notification/>
+          }
+        ]
+      },
       {
         path: "register",
         element: <Register />,
@@ -30,7 +62,7 @@ const routes = [
     element: <Login />,
   },
 ];
-const router = createBrowserRouter(routes);
+export const router = createBrowserRouter(routes);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

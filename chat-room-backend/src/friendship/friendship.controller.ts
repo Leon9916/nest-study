@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { RequireLogin, UserInfo } from 'custom.decorator';
@@ -16,8 +17,8 @@ export class FriendshipController {
 
   @Get('list')
   @RequireLogin()
-  async fiendship(@UserInfo('userId') userId: number) {
-    return this.friendshipService.getFriendship(userId);
+  async fiendship(@UserInfo('userId') userId: number, @Query('name') name: string) {
+    return this.friendshipService.getFriendship(userId, name);
   }
 
   @Post('add')

@@ -37,11 +37,11 @@ export class ChatroomController {
   }
 
   @Get('list')
-  async list(@UserInfo('userId') userId: number) {
+  async list(@UserInfo('userId') userId: number, @Query('name') name) {
     if (!userId) {
       throw new BadGatewayException('用户ID 不能为空');
     }
-    return this.chatroomService.list(userId);
+    return this.chatroomService.list(userId, name);
   }
 
   @Get('members')
