@@ -27,7 +27,7 @@ export class ChatroomService {
         chatroomId: id,
       },
     });
-    return '创建成功';
+    return id;
   }
 
   async createGroupChatroom(name: string, userId: number) {
@@ -61,8 +61,8 @@ export class ChatroomService {
           in: chatroomIds.map((item) => item.chatroomId),
         },
         name: {
-          contains: name
-        }
+          contains: name,
+        },
       },
       select: {
         id: true,
@@ -82,6 +82,14 @@ export class ChatroomService {
           userId: true,
         },
       });
+      if (chatrooms[i].type === false) {
+        const user = await this.prismaService.user.findUnique({
+          where: {
+            id: userIds.filter((item) => item.userId !== userId)[0].userId,
+          },
+        });
+        chatrooms[i].name = user.nickName;
+      }
       res.push({
         ...chatrooms[i],
         userCount: userIds.length,
@@ -164,5 +172,39 @@ export class ChatroomService {
       },
     });
     return '退出成功';
+  }
+
+  async queryOneToOneChatroom(userId1: number, userId2: number) {
+    const chatrooms = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId1,
+      },
+    });
+    const chatrooms2 = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId2,
+      },
+    });
+
+    let res;
+    for (let i = 0; i < chatrooms.length; i++) {
+      const chatroom = await this.prismaService.chatroom.findFirst({
+        where: {
+          id: chatrooms[i].chatroomId,
+        },
+      });
+      if (chatroom.type === true) {
+        continue;
+      }
+
+      const found = chatrooms2.find(
+        (item2) => item2.chatroomId === chatroom.id,
+      );
+      if (found) {
+        res = found.chatroomId;
+        break;
+      }
+    }
+    return res;
   }
 }

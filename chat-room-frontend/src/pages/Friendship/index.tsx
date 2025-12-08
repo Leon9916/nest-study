@@ -2,8 +2,9 @@ import { Badge, Button, Form, Input, Popconfirm, Table, message } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./index.css";
 import { useForm } from "antd/es/form/Form";
-import { friendshipList } from "../../interfaces";
+import { createOneToOne, findChatroom, friendshipList, getUserInfo } from "../../interfaces";
 import { AddFriendModal } from "./AddFriendModal";
+import { useNavigate } from "react-router-dom";
 
 interface SearchFriend {
   name: string;
@@ -22,6 +23,33 @@ export function Friendship() {
     Array<FriendshipSearchResult>
   >([]);
   const [isAddFriendModalOpen, setAddFriendModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  async function goToChat(friendId: number) {
+    const userId = (await getUserInfo()).data.id;
+    console.log(userId);
+    
+    try {
+      const res = await findChatroom(userId, friendId);
+
+      if (res.data) {
+        navigate("/chat", {
+          state: {
+            chatroomId: res.data,
+          },
+        });
+      } else {
+        const res2 = await createOneToOne(friendId);
+        navigate("/chat", {
+          state: {
+            chatroomId: res2.data,
+          },
+        });
+      }
+    } catch (e: any) {
+      message.error(e.response?.data?.message || "系统繁忙，请稍后再试");
+    }
+  }
 
   const columns = useMemo(
     () => [
@@ -46,7 +74,14 @@ export function Friendship() {
         title: "操作",
         render: (_, record) => (
           <div>
-            <a href="#">聊天</a>
+            <a
+              href="#"
+              onClick={() => {
+                goToChat(record.id);
+              }}
+            >
+              聊天
+            </a>
           </div>
         ),
       },

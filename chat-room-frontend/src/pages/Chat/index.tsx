@@ -5,6 +5,7 @@ import "./index.scss";
 import { chatHistoryList, chatroomList } from "../../interfaces";
 import type { UserInfo } from "../UpdateInfo";
 import TextArea from "antd/es/input/TextArea";
+import { useLocation } from "react-router-dom";
 
 interface JoinRoomPayload {
   chatroomId: number;
@@ -66,6 +67,12 @@ export function Chat() {
   const socketRef = useRef<Socket>();
   const [roomId, setChatroomId] = useState<number>();
   const userInfo = getUserInfo();
+
+  const location = useLocation();
+
+  useEffect(() => {
+    setChatroomId(location.state?.chatroomId);
+  }, [location.state?.chatroomId]);
 
   useEffect(() => {
     if (!roomId) {
@@ -173,7 +180,9 @@ export function Chat() {
         {roomList?.map((item) => {
           return (
             <div
-              className="chat-room-item"
+              className={`chat-room-item ${
+                item.id === roomId ? "selected" : ""
+              }`}
               key={item.id}
               data-id={item.id}
               onClick={() => {
