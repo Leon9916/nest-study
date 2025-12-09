@@ -119,17 +119,41 @@ export async function chatHistoryList(id: number) {
 
 export async function findChatroom(userId1: number, userId2: number) {
   return axiosInstance.get(`/chatroom/findChatroom`, {
-      params: {
-          userId1,
-          userId2
-      }
+    params: {
+      userId1,
+      userId2,
+    },
   });
 }
 
-export async function createOneToOne(friendId: number,) {
+export async function createOneToOne(friendId: number) {
   return axiosInstance.get(`/chatroom/create-one-to-one`, {
-      params: {
-          friendId,
-      }
+    params: {
+      friendId,
+    },
+  });
+}
+
+export async function groupMembers(chatroomId: number) {
+  return axiosInstance.get(`/chatroom/members`, {
+    params: {
+      chatroomId,
+    },
+  });
+}
+
+export async function addMember(chatroomId: number, joinUsername: string) {
+  return axiosInstance.get(`/chatroom/join/${chatroomId}`, {
+    params: {
+      joinUsername,
+    },
+  });
+}
+
+export async function createGroup(name: string) {
+  return axiosInstance.get(`/chatroom/create-group`, {
+    params: {
+      name,
+    },
   });
 }

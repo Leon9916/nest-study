@@ -71,8 +71,18 @@ export function Chat() {
   const location = useLocation();
 
   useEffect(() => {
-    setChatroomId(location.state?.chatroomId);
+    if (location.state?.chatroomId) {
+      setChatroomId(location.state?.chatroomId);
+
+      queryChatHistoryList(location.state?.chatroomId);
+    }
   }, [location.state?.chatroomId]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      document.getElementById("bottom-bar")?.scrollIntoView({ block: "end" });
+    }, 300);
+  }, [roomId]);
 
   useEffect(() => {
     if (!roomId) {
