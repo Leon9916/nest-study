@@ -1,11 +1,14 @@
-import { Button, Input, message } from "antd";
+import { Button, Input, message, Popover } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import "./index.scss";
-import { chatHistoryList, chatroomList } from "../../interfaces";
+import { chatHistoryList, chatroomList, favoriteAdd } from "../../interfaces";
 import type { UserInfo } from "../UpdateInfo";
 import TextArea from "antd/es/input/TextArea";
 import { useLocation } from "react-router-dom";
+import EmojiPicker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
+import { UploadModal } from "./UploadModal";
 
 interface JoinRoomPayload {
   chatroomId: number;
@@ -18,8 +21,10 @@ interface SendMessagePayload {
   message: Message;
 }
 
+type MessageType = "image" | "text" | "file";
+
 interface Message {
-  type: "text" | "image";
+  type: MessageType;
   content: string;
 }
 
@@ -67,22 +72,7 @@ export function Chat() {
   const socketRef = useRef<Socket>();
   const [roomId, setChatroomId] = useState<number>();
   const userInfo = getUserInfo();
-
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.state?.chatroomId) {
-      setChatroomId(location.state?.chatroomId);
-
-      queryChatHistoryList(location.state?.chatroomId);
-    }
-  }, [location.state?.chatroomId]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      document.getElementById("bottom-bar")?.scrollIntoView({ block: "end" });
-    }, 300);
-  }, [roomId]);
+  const [isUploadModalOpen, setUploadModalOpen] = useState(false);
 
   useEffect(() => {
     if (!roomId) {
@@ -92,7 +82,7 @@ export function Chat() {
     socket.on("connect", function () {
       const payload: JoinRoomPayload = {
         chatroomId: roomId,
-        userId: getUserInfo().id,
+        userId: userInfo.id,
       };
 
       socket.emit("joinRoom", payload);
@@ -117,7 +107,7 @@ export function Chat() {
     };
   }, [roomId]);
 
-  function sendMessage(value: string) {
+  function sendMessage(value: string, type: MessageType = "text") {
     if (!value) {
       return;
     }
@@ -126,10 +116,10 @@ export function Chat() {
     }
 
     const payload: SendMessagePayload = {
-      sendUserId: getUserInfo().id,
+      sendUserId: userInfo.id,
       chatroomId: roomId,
       message: {
-        type: "text",
+        type,
         content: value,
       },
     };
@@ -154,6 +144,7 @@ export function Chat() {
         );
       }
     } catch (e: any) {
+      console.log(e);
       message.error(e.response?.data?.message || "系统繁忙，请稍后再试");
     }
   }
@@ -162,7 +153,25 @@ export function Chat() {
     queryChatroomList();
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => {
+      document.getElementById("bottom-bar")?.scrollIntoView({ block: "end" });
+    }, 300);
+  }, [roomId]);
+
   const [chatHistory, setChatHistory] = useState<Array<ChatHistory>>();
+
+  async function addToFavorite(chatHistoryId: number) {
+    try {
+      const res = await favoriteAdd(chatHistoryId);
+
+      if (res.status === 201 || res.status === 200) {
+        message.success("收藏成功");
+      }
+    } catch (e: any) {
+      message.error(e.response?.data?.message || "系统繁忙，请稍后再试");
+    }
+  }
 
   async function queryChatHistoryList(chatroomId: number) {
     try {
@@ -183,6 +192,18 @@ export function Chat() {
     }
   }
   const [inputText, setInputText] = useState("");
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.chatroomId) {
+      setChatroomId(location.state?.chatroomId);
+
+      queryChatHistoryList(location.state?.chatroomId);
+    }
+  }, [location.state?.chatroomId]);
+
+  const [uploadType, setUploadType] = useState<"image" | "file">("image");
 
   return (
     <div id="chat-container">
@@ -212,13 +233,27 @@ export function Chat() {
               className={`message-item ${
                 item.senderId === userInfo.id ? "from-me" : ""
               }`}
+              key={item.id}
               data-id={item.id}
+              onDoubleClick={() => {
+                addToFavorite(item.id);
+              }}
             >
               <div className="message-sender">
                 <img src={item.sender.headPic} />
                 <span className="sender-nickname">{item.sender.nickName}</span>
               </div>
-              <div className="message-content">{item.content}</div>
+              <div className="message-content">
+                {item.type === 0 ? (
+                  item.content
+                ) : item.type === 1 ? (
+                  <img src={item.content} style={{ maxWidth: 200 }} />
+                ) : (
+                  <a download href={item.content}>
+                    {item.content}
+                  </a>
+                )}
+              </div>
             </div>
           );
         })}
@@ -227,12 +262,39 @@ export function Chat() {
       <div className="message-input">
         <div className="message-type">
           <div className="message-type-item" key={1}>
-            表情
+            <Popover
+              content={
+                <EmojiPicker
+                  data={data}
+                  onEmojiSelect={(emoji: any) => {
+                    setInputText((inputText) => inputText + emoji.native);
+                  }}
+                />
+              }
+              title="Title"
+              trigger="click"
+            >
+              表情
+            </Popover>
           </div>
-          <div className="message-type-item" key={2}>
+          <div
+            className="message-type-item"
+            key={2}
+            onClick={() => {
+              setUploadType("image");
+              setUploadModalOpen(true);
+            }}
+          >
             图片
           </div>
-          <div className="message-type-item" key={3}>
+          <div
+            className="message-type-item"
+            key={3}
+            onClick={() => {
+              setUploadType("file");
+              setUploadModalOpen(true);
+            }}
+          >
             文件
           </div>
         </div>
@@ -256,6 +318,17 @@ export function Chat() {
           </Button>
         </div>
       </div>
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        type={uploadType}
+        handleClose={(fileUrl) => {
+          setUploadModalOpen(false);
+
+          if (fileUrl) {
+            sendMessage(fileUrl, uploadType);
+          }
+        }}
+      />
     </div>
   );
 }

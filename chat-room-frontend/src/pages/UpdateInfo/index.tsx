@@ -10,7 +10,7 @@ import {
 } from "../../interfaces";
 import { HeadPicUpload } from "./HeadPicUpload";
 
-export interface UserInfo {
+export type UserInfo = {
   headPic: string;
   nickName: string;
   email: string;
